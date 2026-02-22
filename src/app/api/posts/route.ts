@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import matter from "gray-matter";
 
 interface PostPayload {
   title: string;
@@ -9,6 +10,7 @@ interface PostPayload {
   content: string;
   author?: string;
   tags?: string[];
+  coverImage?: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -67,13 +69,16 @@ export async function POST(request: NextRequest) {
 
     // Create frontmatter
     const now = new Date().toISOString();
-    const frontmatter = {
+    const frontmatter: Record<string, unknown> = {
       title: body.title,
       date: now,
       summary: body.summary,
       author: body.author || "",
       tags: body.tags || [],
     };
+    if (body.coverImage) {
+      frontmatter.coverImage = body.coverImage;
+    }
 
     // Create markdown file content
     const fileContent = `---
@@ -109,7 +114,7 @@ ${body.content}`;
   }
 }
 
-// Optional: GET to list all posts
+// GET /api/posts — list all posts with full metadata
 export async function GET() {
   try {
     const postsDirectory = path.join(process.cwd(), "content", "posts");
@@ -121,7 +126,38 @@ export async function GET() {
     const files = fs.readdirSync(postsDirectory);
     const posts = files
       .filter((f) => f.endsWith(".md"))
-      .map((f) => f.replace(".md", ""));
+      .map((f) => {
+        const slug = f.replace(".md", "");
+        try {
+          const filePath = path.join(postsDirectory, f);
+          const fileContents = fs.readFileSync(filePath, "utf8");
+          const { data } = matter(fileContents);
+          return {
+            slug,
+            title: data.title || slug,
+            date: data.date || "",
+            updatedAt: data.updatedAt || null,
+            summary: data.summary || "",
+            author: data.author || "",
+            tags: Array.isArray(data.tags) ? data.tags : [],
+            coverImage: data.coverImage || null,
+          };
+        } catch {
+          return {
+            slug,
+            title: slug,
+            date: "",
+            summary: "",
+            author: "",
+            tags: [],
+          };
+        }
+      })
+      .sort((a, b) => {
+        const da = a.date ? new Date(a.date).getTime() : 0;
+        const db = b.date ? new Date(b.date).getTime() : 0;
+        return db - da;
+      });
 
     return NextResponse.json({ posts });
   } catch (error) {

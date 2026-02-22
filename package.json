@@ -23,6 +23,7 @@
     "remark-html": "^15.0.2",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^10.1.0",
+    "sweetalert2": "^11.26.20",
     "unified": "^11.0.5"
   },
   "devDependencies": {

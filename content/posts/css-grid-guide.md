@@ -1,10 +1,13 @@
 ---
 title: "CSS Grid Layout: A Complete Guide"
 date: "2024-01-05"
+updatedAt: "2026-02-22T11:21:04.297Z"
 summary: "Master CSS Grid Layout with this comprehensive guide covering everything from basics to advanced techniques."
-# tags: ["css", "webdev", "design"]
 author: "Alex Johnson"
+tags: []
+coverImage: "/images/posts/1771759264272-kb38ldnto6.jpg"
 ---
+
 
 # CSS Grid Layout: A Complete Guide
 
